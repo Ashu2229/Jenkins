@@ -19,21 +19,28 @@ pipeline {
                 echo 'I am in Deploy Phase'
             }
         }
-        
-         stage('Monitoring') {
-            steps {
-                echo 'I am in Monitoring Phase'
-            }
-        }
         stage('VersionCheck') {
             steps {
                 echo 'I am in Version Phase'
                 sh 'aws s3 ls'
             }
         }
+        stage('Monitoring') {
+            steps {
+                build 'url-monitoring-job'
+            }
+        }
+        
+        stage('Slack Message') {
+            steps {
+                slackSend channel: '#devops-alerts',
+                color: 'good',
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
+                }
+        }
+      
     }
 }
-
 
 
 
